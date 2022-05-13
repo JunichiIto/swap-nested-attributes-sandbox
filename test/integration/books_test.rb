@@ -39,4 +39,40 @@ class BooksTest < ActionDispatch::IntegrationTest
     assert_equal 'りっちー', @first_author.reload.name
     assert_equal 'かーにはん', @second_author.reload.name
   end
+
+  def assert_records_not_changed
+    assert_equal 'プログラミング言語C', @book.reload.title
+    assert_equal 'かーにはん', @first_author.reload.name
+    assert_equal 'りっちー', @second_author.reload.name
+  end
+
+  test 'バリデーションエラーが発生する場合' do
+    params = {
+      book: {
+        title: '',
+        authors_attributes: {
+          @first_author.id => { id: @first_author.id, name: 'かーにはん', _destroy: '0' },
+          @second_author.id => { id: @second_author.id, name: 'りっちー', _destroy: '0' },
+        }
+      }
+    }
+    put book_path(@book), params: params
+    assert_response :bad_request
+    assert_records_not_changed
+  end
+
+  test 'DBのユニーク制約違反が発生する場合' do
+    params = {
+      book: {
+        title: 'プログラミング言語C',
+        authors_attributes: {
+          @first_author.id => { id: @first_author.id, name: 'りっちー', _destroy: '0' },
+          @second_author.id => { id: @second_author.id, name: 'りっちー', _destroy: '0' },
+        }
+      }
+    }
+    put book_path(@book), params: params
+    assert_response :bad_request
+    assert_records_not_changed
+  end
 end

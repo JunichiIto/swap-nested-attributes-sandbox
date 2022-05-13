@@ -1,4 +1,5 @@
 class Author < ApplicationRecord
   belongs_to :book
-  validates :name, uniqueness: { scope: :book_id }
+
+  validates :name, presence: true, uniqueness: { scope: :book_id }
 end
