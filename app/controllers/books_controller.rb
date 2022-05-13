@@ -1,7 +1,7 @@
 class BooksController < ApplicationController
   def update
     @book = Book.find(params[:id])
-    if @book.update(book_params)
+    if @book.update_with_avoiding_uniqueness_error(book_params)
       head :ok
     else
       head :bad_request
